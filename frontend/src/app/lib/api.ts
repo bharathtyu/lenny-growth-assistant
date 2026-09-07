@@ -1,4 +1,4 @@
-const API_BASE = "http://127.0.0.1:8000";
+const API_BASE = "https://lenny-growth-assistant-gmx9.onrender.com";
 
 export async function createSession() {
   const response = await fetch(`${API_BASE}/api/sessions`, {
