@@ -11,9 +11,14 @@ from app.api import artifact
 
 app = FastAPI(title=settings.APP_NAME)
 
+# Allow both local frontend and Vercel frontend
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:3000"],
+    allow_origins=[
+        "http://localhost:3000",
+        "https://lenny-growth-assistant-chi.vercel.app",
+    ],
+    allow_origin_regex=r"https://.*\.vercel\.app",
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -30,6 +35,7 @@ app.include_router(session_router)
 app.include_router(chat_router)
 app.include_router(message_router)
 app.include_router(artifact.router)
+
 
 @app.get("/")
 async def root():
