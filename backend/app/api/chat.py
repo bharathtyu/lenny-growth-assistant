@@ -1,8 +1,11 @@
 from fastapi import APIRouter
 from pydantic import BaseModel
-import requests
+from openai import OpenAI
+import os
 
 router = APIRouter(prefix="/api/chat", tags=["Chat"])
+
+client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 
 
 class ChatRequest(BaseModel):
@@ -12,35 +15,22 @@ class ChatRequest(BaseModel):
     model: str
 
 
-OLLAMA_URL = "http://127.0.0.1:11434/api/generate"
-
-
 @router.post("")
 async def chat(data: ChatRequest):
     artifact = None
 
     try:
-        if data.provider == "ollama":
-            response = requests.post(
-                OLLAMA_URL,
-                json={
-                    "model": data.model,
-                    "prompt": data.message,
-                    "stream": False,
-                },
-                timeout=60,
-            )
+        response = client.chat.completions.create(
+            model="gpt-4.1-mini",
+            messages=[
+                {"role": "user", "content": data.message}
+            ],
+        )
 
-            response.raise_for_status()
-            result = response.json()
-            reply = result.get("response", "No response from Ollama.")
+        reply = response.choices[0].message.content
 
-        else:
-            reply = f"You said: {data.message}"
-
-    except requests.exceptions.RequestException:
-        # Render doesn't have Ollama running, so return a fallback reply.
-        reply = f"You said: {data.message}"
+    except Exception as e:
+        reply = f"Error: {str(e)}"
 
     # Keep your existing artifact feature
     if "markdown" in data.message.lower():
