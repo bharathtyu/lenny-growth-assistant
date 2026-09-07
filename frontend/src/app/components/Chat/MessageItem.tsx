@@ -1,3 +1,7 @@
+"use client";
+
+import ReactMarkdown from "react-markdown";
+
 type MessageItemProps = {
   role: "user" | "assistant";
   content: string;
@@ -13,7 +17,13 @@ export default function MessageItem({ role, content }: MessageItemProps) {
             : "bg-slate-800 text-white"
         }`}
       >
-        {content}
+        {role === "assistant" ? (
+          <div className="prose prose-invert max-w-none">
+            <ReactMarkdown>{content}</ReactMarkdown>
+          </div>
+        ) : (
+          content
+        )}
       </div>
     </div>
   );
