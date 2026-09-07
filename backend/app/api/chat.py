@@ -5,6 +5,10 @@ import os
 
 router = APIRouter(prefix="/api/chat", tags=["Chat"])
 
+client = OpenAI(
+    api_key=os.getenv("OPENROUTER_API_KEY"),
+    base_url="https://openrouter.ai/api/v1",
+)
 
 class ChatRequest(BaseModel):
     session_id: int
@@ -12,17 +16,13 @@ class ChatRequest(BaseModel):
     provider: str
     model: str
 
-
 @router.post("")
 async def chat(data: ChatRequest):
     artifact = None
 
     try:
-        # Create OpenAI client inside the function
-        client = OpenAI(api_key=os.environ["OPENAI_API_KEY"])
-
         response = client.chat.completions.create(
-            model="gpt-4.1-mini",
+            model="openrouter/free",
             messages=[
                 {"role": "user", "content": data.message}
             ],
@@ -33,13 +33,13 @@ async def chat(data: ChatRequest):
     except Exception as e:
         reply = f"Error: {str(e)}"
 
-    # Keep your artifact feature
     if "markdown" in data.message.lower():
         artifact = {
             "type": "markdown",
             "title": "Generated Markdown",
             "content": reply,
         }
+
     elif "html" in data.message.lower():
         artifact = {
             "type": "html",
