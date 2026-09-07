@@ -5,8 +5,6 @@ import os
 
 router = APIRouter(prefix="/api/chat", tags=["Chat"])
 
-client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
-
 
 class ChatRequest(BaseModel):
     session_id: int
@@ -20,6 +18,9 @@ async def chat(data: ChatRequest):
     artifact = None
 
     try:
+        # Create OpenAI client inside the function
+        client = OpenAI(api_key=os.environ["OPENAI_API_KEY"])
+
         response = client.chat.completions.create(
             model="gpt-4.1-mini",
             messages=[
@@ -32,7 +33,7 @@ async def chat(data: ChatRequest):
     except Exception as e:
         reply = f"Error: {str(e)}"
 
-    # Keep your existing artifact feature
+    # Keep your artifact feature
     if "markdown" in data.message.lower():
         artifact = {
             "type": "markdown",
